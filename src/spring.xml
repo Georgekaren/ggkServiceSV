@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<beans  xmlns="http://www.springframework.org/schema/beans" 
+	    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	    xmlns:aop="http://www.springframework.org/schema/aop" 
+	    xmlns:tx="http://www.springframework.org/schema/tx" 
+	    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	    					http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				            http://www.springframework.org/schema/aop 
+				            http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+				           	http://www.springframework.org/schema/tx 
+				           	http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+ 
+    
+	<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
+		
+
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">  
+   <!--  启动环境为weblogic下 
+      <property name="jndiName">
+	   <value>jdbc/oracle/ggkServerDataSource</value>
+     </property>   -->
+    <property name="jndiName">
+	<value>java:comp/env/jdbc/oracle/ggkServerDataSource</value>
+    </property>
+    
+   </bean> 
+
+    <!-- WebLogic 需要
+  <bean id="transactionManager" class="org.springframework.transaction.jta.WebLogicJtaTransactionManager">
+  	<property name="transactionManagerName" value="javax.transaction.TransactionManager"/> 
+  </bean>
+     -->
+     <!-- 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+	 	 <property name="url" value="jdbc:oracle:thin:@123.126.34.92:1821:daptest"/>  
+	 	 
+		<property name="username" value="SZ_CHECK"/>
+		<property name="password" value="ldau8xWY"/> 
+		<property name="initialSize" value="1"/>
+		<property name="maxActive" value="10"/>
+		<property name="maxIdle" value="5"/>
+		<property name="minIdle" value="1"/>
+	</bean>
+	 -->
+	 <!--  -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" abstract="false" lazy-init="false" autowire="default" dependency-check="default">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+	 <bean id="baseDaoSupport" class="com.tower.resmaster.framework.jdbc.BaseDaoSupport">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="lobHandler" ref="oracleLobHandler"/>
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+	</bean>
+	<bean id="applicationContext" class="org.apache.axis2.extensions.spring.receivers.ApplicationContextHolder" />
+	<bean id="ggkClient" class="com.tower.ggk.wsserver.client.GGKSendMsgClient" /> 
+	<!-- 公共库业务层、dao层bean  -->
+	<bean id="ggkService" class="com.tower.ggk.wsserver.impl.GGKServiceImpl" > 
+	 <property name="ggkServiceDAO" ref="ggkServiceDAO"></property>
+	 <property name="ggkClient" ref="ggkClient"></property>
+	 <property name="updateRuleService" ref="updateRuleService" ></property>
+    </bean>
+    <bean id="ggkServiceDAO" class="com.tower.ggk.wsserver.dao.impl.GGKServiceOracleDAOImpl"  parent="baseDaoSupport"></bean>
+    <bean id="updateRuleService" class="com.tower.ggk.wsserver.service.UpdateRuleService" >
+     <property name="ggkServiceDAO" ref="ggkServiceDAO"></property>
+    </bean> 
+    <!-- spring的属性加载器，加载properties文件中的属性 -->
+	<bean id="propertyConfigurer" class="com.tower.ggk.wsserver.utils.MessagePropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>/WEB-INF/classes/GGK_INTERFACE_MESSAGE.properties</value>
+		</property>
+		<property name="fileEncoding" value="utf-8" />
+	</bean>
+    
+</beans>

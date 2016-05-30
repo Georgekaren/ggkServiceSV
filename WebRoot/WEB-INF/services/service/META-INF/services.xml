@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<serviceGroup>
+<service name="ggkService" targetNamespace="http://impl.wsserver.ggk.tower.com">
+		<schema schemaNamespace="http://impl.wsserver.ggk.tower.com" />
+		<description>
+		</description>
+		<parameter name="ServiceObjectSupplier">org.apache.axis2.extensions.spring.receivers.SpringAppContextAwareObjectSupplier</parameter>
+		    
+		<parameter name="SpringBeanName" locked="false">ggkService</parameter>
+		<!-- <parameter name="ServiceClass" locked="false">com.tower.ggk.wsserver.impl.GGKServiceImpl</parameter> -->
+		<operation name="MT_CPMIS2OA_Req">
+			<messageReceiver class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
+			<actionMapping>urn:DefaultNamespace</actionMapping>
+		</operation>
+</service>
+</serviceGroup> 
+
